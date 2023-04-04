@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+// import { HttpClient } from "@angular/common/http";
 import { FormData } from "./form-data";
 import { Observable } from "rxjs";
 
@@ -8,10 +8,24 @@ import { Observable } from "rxjs";
 })
 export class FormService {
   private apiUrl = "assets/form-data.json";
+  currentPage: Number = 1;
+  formData: any;
 
-  constructor(private http: HttpClient) {}
+  constructor() {}
 
-  getFormData(): Observable<FormData[]> {
-    return this.http.get<FormData[]>(this.apiUrl);
+  getCurrentPage(){
+    return this.currentPage;
+  }
+
+  setCurrentPage(page : Number) {
+    this.currentPage = page;
+  }
+
+  setFormData(data: Object){
+    this.formData = data;
+  }
+
+  getFormData(){
+    return this.formData;
   }
 }
