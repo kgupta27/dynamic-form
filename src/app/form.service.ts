@@ -8,7 +8,7 @@ import { Observable } from "rxjs";
 })
 export class FormService {
   private apiUrl = "assets/form-data.json";
-  currentPage: Number = 1;
+  currentPage: string = "1";
   formData: any;
 
   constructor() {}
@@ -17,7 +17,7 @@ export class FormService {
     return this.currentPage;
   }
 
-  setCurrentPage(page : Number) {
+  setCurrentPage(page : string) {
     this.currentPage = page;
   }
 
@@ -27,5 +27,10 @@ export class FormService {
 
   getFormData(){
     return this.formData;
+  }
+
+  clearFormData(){
+    this.currentPage = "1";
+    this.formData = {};
   }
 }

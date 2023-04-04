@@ -11,8 +11,12 @@ import SwiperCore, { Pagination, Keyboard } from 'swiper';
 import { SwiperModule } from 'swiper/angular';
 import { FormService } from '../form.service';
 import { ToastService } from '../services/toast.service';
+import { FormData } from '../form-data';
 
-SwiperCore.use([Pagination, Keyboard]);
+interface MyData {
+  [key: string]: any;
+}
+
 @Component({
   selector: 'app-form',
   templateUrl: './form.component.html',
@@ -20,17 +24,13 @@ SwiperCore.use([Pagination, Keyboard]);
   standalone: true,
   imports: [IonicModule, CommonModule, ReactiveFormsModule, SwiperModule],
 })
+
 export class FormPage implements OnInit {
 
-  // @ViewChild(IonicSlides) slides: IonicSlides;
-
-  slideOpts = {
-    initialSlide: 0,
-    speed: 400
-  };
   form!: FormGroup;
-  pages: any[] = [];
-  currentFormPage: Number = 1;
+  pages: FormData[] = [];
+  page: FormData | undefined;
+  currentFormPage: string = "1";
 
   constructor(
     private formBuilder: FormBuilder,
@@ -40,14 +40,14 @@ export class FormPage implements OnInit {
     private activatedRoute: ActivatedRoute,
     public toast: ToastService
   ) { 
-      this.currentFormPage = this.formService.getCurrentPage();
+      this.currentFormPage = this.formService.getCurrentPage().toString();
 
       this.activatedRoute.queryParams.subscribe((params: any) => {
         if (params && params.currentForm && params.currentForm > 0) {
           this.currentFormPage = JSON.parse(params.currentForm);
           this.createForm();
         }else {
-          this.currentFormPage = 1;
+          this.currentFormPage = "1";
         }
       });
   }
@@ -60,30 +60,43 @@ export class FormPage implements OnInit {
     this.http.get('assets/form-data.json').subscribe((data: any) => {
       this.pages = data.pages;
 
-      this.pages = this.pages.filter(el => el.pageid == this.currentFormPage)
+      const initialData = this.formService.getFormData();
+      this.page = this.pages.find(el => el.pageid == this.currentFormPage);
+      this.page?.controls.sort((a, b) => {
+        const positionA = parseFloat(a.position);
+        const positionB = parseFloat(b.position);
+        return positionA - positionB;
+      });
+      console.log(this.page);
       this.form = this.formBuilder.group({});
 
-      this.pages.forEach((page: any) => {
-        page.controls.forEach((control: any) => {
-          // const validators = [];
-          // if (control.validation) {
-          //   if (control.validation === 'email') {
-          //     validators.push(Validators.email);
-          //   } else if (control.validation === 'password') {
-          //     validators.push(Validators.minLength(6));
-          //   }
-          // }
-          this.form.addControl(control.id, this.formBuilder.control('', []));
-          console.log(this.pages)
+      // this.pages.forEach((page: any) => {
+        this.page?.controls.forEach((control: any) => {
+          // Can use if we have validations in our JSON data
+          const validators = [];
+          if (control.validation) {
+            if (control.validation === 'email') {
+              validators.push(Validators.email);
+            } else if (control.validation === 'password') {
+              validators.push(Validators.minLength(6));
+            }
+          }
+          if(!initialData) {
+            this.form.addControl(control.id, this.formBuilder.control('', validators));
+          } else {
+            this.form.addControl(control.id, this.formBuilder.control( this.patchValue(control.id, initialData) , validators));
+          }
         });
       });
-    });
+    // });
   }
 
-  getControlOffset(control: any) {
-    const position = control.position.split('.');
-    const col = position[1];
-    return `--ion-grid-column-${col}`;
+  patchValue(control: string, data : MyData) {
+    if(data.hasOwnProperty(control)){
+      return data[control];
+    }else{
+      return '';
+    }
   }
 
   getButtonColor(control: any) {
@@ -104,9 +117,9 @@ export class FormPage implements OnInit {
     }
   }
 
-  getControlOrder(control: any) {
-    return parseInt(control.position.replace('.', ''), 10);
-  }
+  // getControlOrder(control: any) {
+  //   return parseInt(control.position.replace('.', ''), 10);
+  // }
 
   onButtonClick(control: any) {
     // handle button click event here
@@ -127,6 +140,8 @@ export class FormPage implements OnInit {
 
       this.formService.setFormData(data);
     } else {
+        this.formService.clearFormData();
+        this.router.navigate(['home']);
         this.toast.showToast('Form created successfully');
     }
   }

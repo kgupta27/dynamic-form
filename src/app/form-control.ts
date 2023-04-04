@@ -5,6 +5,8 @@ export interface FormControl {
     text?: string;
     value?: string;
     validation?: string;
+    fontWeight?: string,
+    textTransform?: string,
     options?: { id: string; value: string }[];
     navigate?: string;
     style?: { [key: string]: string };

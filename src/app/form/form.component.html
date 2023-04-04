@@ -8,16 +8,16 @@
 
 <ion-content>
   <!-- <swiper [pagination]="{ clickable: true }" [keyboard]="true"> -->
-    <ng-container *ngFor="let page of pages">
+    <ng-container  *ngFor="let control of page?.controls" >
       <!-- <swiper-slide> -->
         <ion-grid [formGroup]="form">
           <!-- <ion-row *ngFor="let row of page?.rows"> -->
           <!-- [size-xl]="control.sizeXl" [size-lg]="control.sizeLg" [size-md]="control.sizeMd" [size-sm]="control.sizeSm" [size-xs]="control.sizeXs"  -->
-          <ion-col *ngFor="let control of page?.controls" [ngSwitch]="control?.type" >
+          <ion-col [ngSwitch]="control?.type" >
             <ng-container *ngSwitchCase="'textbox'">
               <ion-item>
                 <ion-label position="stacked">{{control?.text}}</ion-label>
-                <ion-input type="{{control?.validation === 'password' ? 'password' : 'text'}}" formControlName="{{control?.id}}" [placeholder]="control?.placeholder" (ionChange)="onInputChange(control)" [ngStyle]="{'font-weight': control?.fontWeight, 'text-transform': control?.textTransform}"></ion-input>
+                <ion-input type="{{control?.validation === 'password' ? 'password' : 'text'}}" formControlName="{{control?.id}}" (ionChange)="onInputChange(control)" [ngStyle]="{'font-weight': control?.fontWeight, 'text-transform': control?.textTransform}"></ion-input>
               </ion-item>
             </ng-container>
             <ng-container *ngSwitchCase="'label'">

@@ -12,6 +12,7 @@ export class ToastService {
     private toast: ToastController
   ) { }
 
+  // Present Toast 
   showToast(msg : string) {
     this.myToast = this.toast.create({
       message: msg,
@@ -21,6 +22,8 @@ export class ToastService {
       toastData.present();
     });
   }
+
+  // Hide Toast
   hideToast() {
     this.myToast = this.toast.dismiss();
   }
